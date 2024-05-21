@@ -1,57 +1,71 @@
-<script>
-export default {
-  data() {
-    return {
-      title: 'My New Vue Title',
-      message: 'Welcome to Vue',
-      isRed: true,
-      input: {
-        firstName: '',
-        lastName: '',
-        isMember: true
-      },
-      users: [
-        {
-          firstName: 'John',
-          lastName: 'Smith',
-          isMember: true
-        },
-        {
-          firstName: 'Taro',
-          lastName: 'Shinjuku',
-          isMember: false
-        },
-        {
-          firstName: 'Hanako',
-          lastName: 'Shibuya',
-          isMember: true
-        }
-      ]
-    }
+<script setup>
+import { ref } from 'vue'
+const title = ref('My ToDo App')
+const input = ref({
+  todo: '',
+  isDone: false
+})
+const todos = ref([
+  {
+    todo: 'vueをマスターする',
+    isDone: true
   },
-  methods: {
-    addUser() {
-      this.users.push(this.input)
-      this.input = {
-        firstName: '',
-        lastName: '',
-        isMember: true
-      }
-    }
+  {
+    todo: '牛乳を買う',
+    isDone: false
+  },
+  {
+    todo: '家賃を払う',
+    isDone: false
   }
+])
+
+const addTodo = () => {
+  if (input.value.todo.trim() !== '') {
+    todos.value.push({ ...input.value })
+    input.value.todo = ''
+    input.value.isDone = false
+  }
+}
+
+const clearDoneTodos = () => {
+  todos.value = todos.value.filter((todo) => !todo.isDone)
 }
 </script>
 
 <template>
-  <h1 :title="message" :class="{ red: isRed }">{{ title }}</h1>
-  <input type="text" v-model="input.firstName" />
-  <input type="text" v-model="input.lastName" />
-  <input type="checkbox" v-model="input.isMember" />
-  <button v-on:click="addUser">ユーザー追加</button>
-  <h2>ユーザーのデータ</h2>
-  <div v-for="user in users" :key="user">
-    <p>Name: {{ user.firstName + ' ' + user.lastName }}</p>
-    <p v-if="user.isMember">メンバーです</p>
-    <p v-else>メンバーではありません</p>
+  <h1 :title="message">{{ title }}</h1>
+  <input type="text" v-model="input.todo" />
+  <div v-if="input.todo.length === 0">
+    <p>todoを記入してください</p>
+  </div>
+  <div v-else>
+    <button @click="addTodo">追加</button>
+  </div>
+
+  <button @click="clearDoneTodos">完了済みを削除する</button>
+  <h2>Todoリスト</h2>
+  <div>
+    <div v-if="todos.length === 0">
+      <p>todoはまだありません！</p>
+    </div>
+    <ul v-show="todos.length !== 0">
+      <li v-for="(todo, index) in todos" :key="index">
+        <p>
+          <input type="checkbox" v-model="todo.isDone" />
+          <span :class="{ 'todo-done': todo.isDone }">{{ todo.todo }}</span>
+        </p>
+      </li>
+    </ul>
   </div>
 </template>
+
+<style>
+body {
+  background-color: #eee;
+}
+
+.todo-done {
+  text-decoration: line-through;
+}
+</style>
